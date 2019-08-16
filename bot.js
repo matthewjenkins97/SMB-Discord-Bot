@@ -138,6 +138,8 @@ client.on('message', msg => {
   // Output: dependent on query, does different things. See documentation 
   // here: https://pastebin.com/ACpWB2YC
 
+  console.log(`Message received from ${msg.author} at ${msg.createdAt}`);
+
   if (msg.content.startsWith('!randomStage')) {
     // Random stage - only 1 argument needed
     argList = msg.content.split(' ');
@@ -149,6 +151,7 @@ client.on('message', msg => {
 
       // feed arguments to function
       item = randomStage(argList[0]);
+      console.log(item);
 
       // make the message using formatData,
       // then add attachment of image from the URL of the item.
@@ -180,12 +183,15 @@ client.on('message', msg => {
       // then add attachment of image from the URL of the item.
       if (item == undefined) {
         msg.reply('No levels found in database with that ID.');
+        console.log('No levels found in database with that ID.');
       }
 
       else {
         // make the message using formatData,
         // then add attachment of image from the URL of the item.
         msg.reply(formatData(item));
+        console.log(item);
+
         pictureAttachment = new Discord.Attachment(`./${item.picture}`);
         embed = {
           image: {
@@ -221,6 +227,7 @@ client.on('message', msg => {
 
       if (itemList.length == 0) {
         msg.reply('No levels found in database with that name.');
+        console.log('No levels found in database with that name.');
       }
       else {
         // if you do a dumb search (like a 1 letter search), it shouldn't print 
@@ -231,7 +238,7 @@ client.on('message', msg => {
         endPoint = itemList.length > 5 ? 5 : itemList.length;
         endPointFlag = endPoint == 5 ? true : false;
         if (endPointFlag) {
-          msg.reply("Only 5 most relevant items shown. Pictures will not be embedded.");
+          msg.reply('Only 5 most relevant items shown. Pictures will not be embedded.');
         }
 
         // for each photo found in itemList, up to endPoint, print formatted
@@ -239,6 +246,8 @@ client.on('message', msg => {
         // set to true.
         for (var i = 0; i < endPoint; i++) {
           msg.reply(formatData(itemList[i]));
+          console.log(itemList[i]);
+          
           if (!endPointFlag) {
             pictureAttachment = new Discord.Attachment(`./${itemList[i].picture}`);
             embed = {
