@@ -1,0 +1,10 @@
+{
+  "name": "smb-name-bot",
+  "version": "1.0.0",
+  "description": "This is a bot used in the super monkey ball discord which is used to clear up level name confusion. Functions: https://pastebin.com/ACpWB2YC",
+  "main": "main.js",
+  "author": "Matthew Jenkins",
+  "dependencies": {
+    "discord.js": "^11.5.1"
+  }
+}
