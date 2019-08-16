@@ -1,15 +1,13 @@
-/*jshint esversion: 6 */
-
 const fs = require('fs');
 
 ////////////////////////////////////////////////////////////////////////////////
 // SMB2 INFO
 ////////////////////////////////////////////////////////////////////////////////
 
-difficultySMB2 = ['beginner', 'beginnerExtra', 'advanced', 'advancedExtra', 'expert', 'expertExtra', 'master', 'masterExtra', 'story'];
+const difficultySMB2 = ['beginner', 'beginnerExtra', 'advanced', 'advancedExtra', 'expert', 'expertExtra', 'master', 'masterExtra', 'story'];
 
 // lists of numbers from 1 to n inclusive, where n is number of levels
-levelSMB2 = {
+const levelSMB2 = {
   'beginner': Array.from({length: 10}, (_, i) => i + 1),
   'beginnerExtra': Array.from({length: 10}, (_, i) => i + 1),
   'advanced': Array.from({length: 30}, (_, i) => i + 1),
@@ -21,7 +19,7 @@ levelSMB2 = {
   'story': Array.from({length: 100}, (_, i) => i + 1),
 };
 
-namesSMB2 = {
+const namesSMB2 = {
   'beginner': ['Simple','Hollow','Bumpy','Switches','Bowl (Rising Inclines)','Floaters','Slopes (Tub)','Sliders (Windy Slide)','Spinning Top','Curve Bridge'],
 
   'beginnerExtra': ['Conveyers','Bumpy Check','Alternative','Junction','Bead Screen','Fluctuation','Folders','Quick Turn','Linear Seesaws','Birth'],
@@ -44,10 +42,10 @@ namesSMB2 = {
 // SMB1 INFO
 ////////////////////////////////////////////////////////////////////////////////
 
-difficultySMB1 = ['beginner', 'beginnerExtra', 'advanced', 'advancedExtra', 'expert', 'expertExtra', 'master'];
+const difficultySMB1 = ['beginner', 'beginnerExtra', 'advanced', 'advancedExtra', 'expert', 'expertExtra', 'master'];
 
 // lists of numbers from 1 to n inclusive, where n is number of levels
-levelSMB1 = {
+const levelSMB1 = {
   'beginner': Array.from({length: 10}, (_, i) => i + 1),
   'beginnerExtra': Array.from({length: 3}, (_, i) => i + 1),
   'advanced': Array.from({length: 30}, (_, i) => i + 1),
@@ -57,7 +55,7 @@ levelSMB1 = {
   'master': Array.from({length: 10}, (_, i) => i + 1),
 };
 
-namesSMB1 = {
+const namesSMB1 = {
   'beginner': ['Plain','Diamond','Hairpin','Wide Bridge','Bonus Basic','Slopes','Steps','Blocks','Jump Single','Exam-A'],
 
   'beginnerExtra': ['Blur Bridge','Hitter','AV Logo'],
@@ -130,9 +128,9 @@ function createStages(game, difficulty, level, names) {
   return stages;
 }
 
-smb1 = createStages("smb1", difficultySMB1, levelSMB1, namesSMB1);
-smb2 = createStages("smb2", difficultySMB2, levelSMB2, namesSMB2);
-all = smb1.concat(smb2);
+const smb1 = createStages("smb1", difficultySMB1, levelSMB1, namesSMB1);
+const smb2 = createStages("smb2", difficultySMB2, levelSMB2, namesSMB2);
+const all = smb1.concat(smb2);
 
-data = JSON.stringify(all);
+const data = JSON.stringify(all);
 fs.writeFileSync('smb-data.json', data);

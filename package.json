@@ -6,5 +6,8 @@
   "author": "Matthew Jenkins",
   "dependencies": {
     "discord.js": "^11.5.1"
+  },
+  "devDependencies": {
+    "eslint": "^6.1.0"
   }
 }

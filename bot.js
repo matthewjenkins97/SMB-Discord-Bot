@@ -1,16 +1,14 @@
-/*jshint esversion: 6 */
-
 const fs = require('fs');
 
-rawData = fs.readFileSync('smb-data.json');
-smbData = JSON.parse(rawData);
+const rawData = fs.readFileSync('smb-data.json');
+const smbData = JSON.parse(rawData);
 
 function randomStage(game) {
   // Input: stages, a list of SMBStage objects.
   // Output: random stage from Stages.
   game = game.toUpperCase();
 
-  levelList = [];
+  const levelList = [];
   smbData.forEach(function(item) {
     if (item.game.toUpperCase() == game) {
       levelList.push(item); 
@@ -20,7 +18,7 @@ function randomStage(game) {
   return levelList[Math.floor(Math.random() * Object.keys(levelList).length)];
 }
 
-function getSMBLevelFromID(game, levelID) {
+function getSMBLevelFromID(gameName, levelID) {
   // Input: game (from SMB1, SMB2), level number in form:
     //B01, B02, ... 
     //BE01, BE02, ...
@@ -33,10 +31,10 @@ function getSMBLevelFromID(game, levelID) {
 
   // check proper formatting using regex before running query
 
-  game = game.toUpperCase();
-  level = levelID.toUpperCase();
+  const game = gameName.toUpperCase();
+  const level = levelID.toUpperCase();
 
-  levelConversions = {
+  const levelConversions = {
     'B': 'beginner', 
     'BE': 'beginnerExtra', 
     'A': 'advanced', 
@@ -48,10 +46,10 @@ function getSMBLevelFromID(game, levelID) {
     'S': 'story', 
   };
 
-  levelDifficulty = level.length == 4 ? levelConversions[level.substr(0, 2)] : levelConversions[level.substr(0, 1)];
-  levelNumber = level.length == 4 ? parseInt(level.substr(2, 2)) : parseInt(level.substr(1, 2));
+  const levelDifficulty = level.length == 4 ? levelConversions[level.substr(0, 2)] : levelConversions[level.substr(0, 1)];
+  const levelNumber = level.length == 4 ? parseInt(level.substr(2, 2)) : parseInt(level.substr(1, 2));
 
-  foundItem = undefined;
+  let foundItem = undefined;
 
   // search is done by going through each element in smbData and then returning the smbData that matches it
   smbData.forEach(function(item) {
@@ -71,7 +69,7 @@ function getSMBLevelFromName(game, levelName) {
 
   // search is done by going through each element in smbData and then returning the smbData that matches it 
 
-  levels = [];
+  const levels = [];
   smbData.forEach(function(item) {
     if (item.game.toUpperCase() == game.toUpperCase() &&
         item.name.toUpperCase().includes(levelName.toUpperCase())) {
@@ -94,11 +92,11 @@ function formatData(item) {
     // name: 
     // picture: 
 
-  itemString = '\n';
+  let itemString = '\n';
   itemString = itemString + `Game: ${item.game.toUpperCase()}\n`;
 
   // converting difficulty to look nicer when output
-  difficultyConversion = {
+  const difficultyConversion = {
     'beginner': 'Beginner', 
     'beginnerExtra': 'Beginner Extra', 
     'advanced': 'Advanced', 
@@ -142,7 +140,7 @@ client.on('message', msg => {
 
   if (msg.content.startsWith('!randomStage')) {
     // Random stage - only 1 argument needed
-    argList = msg.content.split(' ');
+    let argList = msg.content.split(' ');
     argList = argList.slice(1, argList.length);
 
     // Checking if arguments are valid 
@@ -150,14 +148,14 @@ client.on('message', msg => {
         ['SMB1', 'SMB2'].includes(argList[0].toUpperCase())) {
 
       // feed arguments to function
-      item = randomStage(argList[0]);
+      const item = randomStage(argList[0]);
       console.log(item);
 
       // make the message using formatData,
       // then add attachment of image from the URL of the item.
       msg.reply(formatData(item));
-      pictureAttachment = new Discord.Attachment(`./${item.picture}`);
-      embed = {
+      const pictureAttachment = new Discord.Attachment(`./${item.picture}`);
+      const embed = {
         image: {
           url: `attachment://${item.picture}`,
         }
@@ -168,7 +166,7 @@ client.on('message', msg => {
 
   else if (msg.content.startsWith('!getStageFromID')) {
     // Get stage from ID - 2 arguments needed
-    argList = msg.content.split(' ');
+    let argList = msg.content.split(' ');
     argList = argList.slice(1, argList.length);
 
     // Checking if arguments are valid 
@@ -177,7 +175,7 @@ client.on('message', msg => {
         argList[1].match(/[A-Za-z]{1,2}\d{2}/)) {
 
       // feed arguments to function
-      item = getSMBLevelFromID(argList[0], argList[1]);
+      const item = getSMBLevelFromID(argList[0], argList[1]);
 
       // make the message using formatData,
       // then add attachment of image from the URL of the item.
@@ -192,8 +190,8 @@ client.on('message', msg => {
         msg.reply(formatData(item));
         console.log(item);
 
-        pictureAttachment = new Discord.Attachment(`./${item.picture}`);
-        embed = {
+        const pictureAttachment = new Discord.Attachment(`./${item.picture}`);
+        const embed = {
           image: {
             url: `attachment://${item.picture}`,
           }
@@ -205,7 +203,7 @@ client.on('message', msg => {
 
   else if (msg.content.startsWith('!getStageFromName')) {
     // Get stage from Name - 2+ arguments needed
-    argList = msg.content.split(' '); 
+    let argList = msg.content.split(' '); 
     argList = argList.slice(1, argList.length);
 
     // Checking if arguments are valid 
@@ -213,11 +211,11 @@ client.on('message', msg => {
         ['SMB1', 'SMB2'].includes(argList[0].toUpperCase())) {
 
       // get all array things past index 1 and merge them to form 1 word
-      name = argList.slice(1, argList.length);
+      let name = argList.slice(1, argList.length);
       name = name.join(' ');
 
       // feed arguments to function
-      itemList = getSMBLevelFromName(argList[0], name);
+      const itemList = getSMBLevelFromName(argList[0], name);
 
       // make the message using formatData,
       // then add attachment of image from the URL of the item.
@@ -230,13 +228,13 @@ client.on('message', msg => {
         console.log('No levels found in database with that name.');
       }
       else {
-        // if you do a dumb search (like a 1 letter search), it shouldn't print 
+        // if you do a dumb search (like a 1 constter search), it shouldn't print 
         // every possible search query to the server.
         // this controls that - if the query returns more than 5 elements, it 
         // will only print 5 elements, and not print any pictures to go with it.
         // this should help with bandwidth concerns.
-        endPoint = itemList.length > 5 ? 5 : itemList.length;
-        endPointFlag = endPoint == 5 ? true : false;
+        const endPoint = itemList.length > 5 ? 5 : itemList.length;
+        const endPointFlag = endPoint == 5 ? true : false;
         if (endPointFlag) {
           msg.reply('Only 5 most relevant items shown. Pictures will not be embedded.');
         }
@@ -244,13 +242,13 @@ client.on('message', msg => {
         // for each photo found in itemList, up to endPoint, print formatted
         // stage data and embed pictures to go with it, unless endpointflag is
         // set to true.
-        for (var i = 0; i < endPoint; i++) {
+        for (let i = 0; i < endPoint; i++) {
           msg.reply(formatData(itemList[i]));
           console.log(itemList[i]);
           
           if (!endPointFlag) {
-            pictureAttachment = new Discord.Attachment(`./${itemList[i].picture}`);
-            embed = {
+            const pictureAttachment = new Discord.Attachment(`./${itemList[i].picture}`);
+            const embed = {
               image: {
                 url: `attachment://${itemList[i].picture}`,
               }
