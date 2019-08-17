@@ -46,20 +46,39 @@ function getSMBLevelFromID(gameName, levelID) {
     'S': 'story', 
   };
 
-  const levelDifficulty = level.length == 4 ? levelConversions[level.substr(0, 2)] : levelConversions[level.substr(0, 1)];
-  const levelNumber = level.length == 4 ? parseInt(level.substr(2, 2)) : parseInt(level.substr(1, 2));
-
   let foundItem = undefined;
 
-  // search is done by going through each element in smbData and then returning the smbData that matches it
-  smbData.forEach(function(item) {
-    if (item.game.toUpperCase() == game &&
-        item.difficulty == levelDifficulty &&
-        item.level == levelNumber) {
-      foundItem = item;
-    }
-  });
-  
+  // if regex is of form SWWXX where WW is world # and XX is stage number:
+  if (level.startsWith('S')) {
+    const levelDifficulty = 'story';
+    const worldNumber = level.substr(1, 2);
+    const levelNumber = level.substr(3, 2);
+
+    // search is done by going through each element in smbData and then returning the smbData that matches it
+    smbData.forEach(function(item) {
+      if (item.game.toUpperCase() == game &&
+          item.difficulty == levelDifficulty &&
+          item.level == levelNumber &&
+          item.world == worldNumber) {
+        foundItem = item;
+      }
+    });
+
+  }
+  else {
+    const levelDifficulty = level.length == 4 ? levelConversions[level.substr(0, 2)] : levelConversions[level.substr(0, 1)];
+    const levelNumber = level.length == 4 ? parseInt(level.substr(2, 2)) : parseInt(level.substr(1, 2));
+
+    // search is done by going through each element in smbData and then returning the smbData that matches it
+    smbData.forEach(function(item) {
+      if (item.game.toUpperCase() == game &&
+          item.difficulty == levelDifficulty &&
+          item.level == levelNumber) {
+        foundItem = item;
+      }
+    });
+  }
+
   return foundItem;
 }
 
@@ -136,9 +155,9 @@ client.on('message', msg => {
   // Output: dependent on query, does different things. See documentation 
   // here: https://pastebin.com/ACpWB2YC
 
-  console.log(`Message received from ${msg.author} at ${msg.createdAt}`);
-
   if (msg.content.startsWith('!randomStage')) {
+    console.log(`Message received from ${msg.author} at ${msg.createdAt}`);
+
     // Random stage - only 1 argument needed
     let argList = msg.content.split(' ');
     argList = argList.slice(1, argList.length);
@@ -165,6 +184,8 @@ client.on('message', msg => {
   }
 
   else if (msg.content.startsWith('!getStageFromID')) {
+    console.log(`Message received from ${msg.author} at ${msg.createdAt}`);
+
     // Get stage from ID - 2 arguments needed
     let argList = msg.content.split(' ');
     argList = argList.slice(1, argList.length);
@@ -172,7 +193,8 @@ client.on('message', msg => {
     // Checking if arguments are valid 
     if (argList.length == 2 && 
         ['SMB1', 'SMB2'].includes(argList[0].toUpperCase()) &&
-        argList[1].match(/[A-Za-z]{1,2}\d{2}/)) {
+        (argList[1].match(/[ABEMabem]{1,2}\d{2}/) || 
+        argList[1].match(/[Ss]\d{4}/))) {
 
       // feed arguments to function
       const item = getSMBLevelFromID(argList[0], argList[1]);
@@ -202,6 +224,8 @@ client.on('message', msg => {
   }
 
   else if (msg.content.startsWith('!getStageFromName')) {
+    console.log(`Message received from ${msg.author} at ${msg.createdAt}`);
+
     // Get stage from Name - 2+ arguments needed
     let argList = msg.content.split(' '); 
     argList = argList.slice(1, argList.length);
@@ -228,7 +252,7 @@ client.on('message', msg => {
         console.log('No levels found in database with that name.');
       }
       else {
-        // if you do a dumb search (like a 1 constter search), it shouldn't print 
+        // if you do a dumb search (like a 1 letter search), it shouldn't print 
         // every possible search query to the server.
         // this controls that - if the query returns more than 5 elements, it 
         // will only print 5 elements, and not print any pictures to go with it.
