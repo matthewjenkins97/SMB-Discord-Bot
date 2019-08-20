@@ -155,7 +155,13 @@ client.on('message', msg => {
   // Output: dependent on query, does different things. See documentation 
   // here: https://pastebin.com/ACpWB2YC
 
-  if (msg.content.startsWith('!randomStage')) {
+  if (msg.content.startsWith('!about')) {
+    console.log(`Message received from ${msg.author} at ${msg.createdAt}`);
+    console.log(`About message requested.`)
+    msg.reply(`Hi! I'm a Discord bot used to improve QOL for the members of the Super Monkey Ball speedrunning Discord. My functions can be found here: https://pastebin.com/ACpWB2YC`);
+  }
+
+  else if (msg.content.startsWith('!randomStage')) {
     console.log(`Message received from ${msg.author} at ${msg.createdAt}`);
 
     // Random stage - only 1 argument needed
