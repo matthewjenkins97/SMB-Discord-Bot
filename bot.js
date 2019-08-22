@@ -148,6 +148,10 @@ client.on('ready', () => {
   // Input: none
   // Output: Message which affirms connectivity.
   console.log(`Logged in as ${client.user.tag}!`);
+
+  // TODO: Add a SRC fetch to check for new PBs.
+    // what time range would make sense? a check each day? 
+    // is this already implemented in other discords?
 });
 
 client.on('message', msg => {

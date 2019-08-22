@@ -96,7 +96,7 @@ class SMBStage {
       this.level = level;
     }
     this.name = name;
-    this.picture = `${game}/${difficulty}/${level}.png`;
+    this.picture = `${game}/${difficulty}/${level}.jpg`;
   }
 }
 
