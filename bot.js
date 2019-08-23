@@ -136,6 +136,107 @@ function formatData(item) {
   return itemString;
 }
 
+const request = require('request-promise');
+// const requestDebug = require('request-debug');
+
+// if (process.env.NODE_ENV !== 'production') {
+// 	requestDebug(request);
+// }
+
+function getTimes(leaderboard) {
+    // Input: JSON file
+    // Output: All run objects from the JSON file with a date greater than yesterday's date.
+
+    // let yesterday = new Date('July 22, 2019')
+
+    let yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    let runs = [];
+
+    // go through each run in the provided leaderboard
+    for (const item of leaderboard.data.runs) {
+        const submitDate = new Date(item.run.submitted);
+        const verifyDate = item.run.status['verify-date'] ? new Date(item.run.status['verify-date']) : undefined;
+
+        //defer to verifydate unless null, in which case defer to submitdate
+
+        if (verifyDate && verifyDate >= yesterday) {
+            runs.push(item.run);
+        }
+        else if (submitDate >= yesterday) {
+            runs.push(item.run);
+        }
+    }
+
+    return runs;
+}
+
+async function requestSMBLeaderboards() {
+    // Input: None.
+    // Output: list of all runs from leaderboards with time greater than yesterday.
+
+    const smb1Leaderboards = ['Beginner', 'Beginner-Ex', 'Advanced', 'Advanced-Ex', 'Expert', 'Master', 'All_Difficulties'];
+    const smb2Leaderboards = ['Story_Mode', 'Beginner', 'Advanced', 'Expert', 'Master', 'All_Difficulties'];
+    let newTimes = [];
+
+    // go through each category in the provided leaderboard
+    for (const item of smb1Leaderboards) {
+        let leaderboardTimes = [];
+        let lb = await request(`https://www.speedrun.com/api/v1/leaderboards/supermonkeyball/category/${item}`);
+
+        // console.log(`Leaderboard obtained from ${item}`);
+        const leaderboard = JSON.parse(lb);
+        leaderboardTimes = getTimes(leaderboard);
+
+        newTimes = newTimes.concat(leaderboardTimes)
+    }
+
+    // go through each category in the provided leaderboard
+    for (const item of smb2Leaderboards) {
+        let leaderboardTimes = [];
+        let lb = await request(`https://www.speedrun.com/api/v1/leaderboards/supermonkeyball2/category/${item}`);
+
+        // console.log(`Leaderboard obtained from ${item}`);
+        const leaderboard = JSON.parse(lb);
+        leaderboardTimes = getTimes(leaderboard);
+
+        newTimes = newTimes.concat(leaderboardTimes)
+    }
+
+    return newTimes;
+}
+
+async function generateNewTimes() {
+  // Input: none
+  // Output: All users, categories, and times from the past day.
+    let runs = await requestSMBLeaderboards();
+
+    let formattedRuns = [];
+    for (const item of runs) {
+        let userData = await request(`https://www.speedrun.com/api/v1/users/${item.players[0].id}`);
+        userData = JSON.parse(userData);
+        const username = userData.data.names.international;
+
+        let gameData = await request(`https://www.speedrun.com/api/v1/games/${item.game}`)
+        gameData = JSON.parse(gameData);
+        const game = gameData.data.names.international;
+
+        let categoryData = await request(`https://www.speedrun.com/api/v1/categories/${item.category}`);
+        categoryData = JSON.parse(categoryData);
+        const category = categoryData.data.name;
+
+        let time = item.times.primary_t;
+        const hours = Math.floor(time / 3600).toString().padStart(2, "0");
+        const minutes = Math.floor(time / 60).toString().padStart(2, "0");
+        const seconds = (time % 60).toString().padStart(2, "0");
+
+        formattedRuns.push({'username': username, 'game': game, 'category': category, 'time': {'h': hours, 'm': minutes, 's': seconds}});
+    }
+
+  return formattedRuns;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Bot Stuff
 ////////////////////////////////////////////////////////////////////////////////
@@ -144,14 +245,28 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 const auth = require('./auth.json');
 
+async function checkPBs() {
+  // Input: None.
+  // Output: Messages to specific channel which state PBs done in the past day.
+  console.log(`Checking for PBs at ${new Date()}`);
+
+  const newTimes = await generateNewTimes();
+  for (const item of newTimes) {
+    const sentence = `In ${item.game}, ${item.username} got a new PB of ${item.time.h}:${item.time.m}:${item.time.s} in the ${item.category} category!`
+    client.channels.get('603335654415400961').send(sentence);
+    // SMB PB brag
+    // client.channels.get('614275762102468618').send(sentence);
+    // BIS PB brag
+  }
+
+  setTimeout(checkPBs, 86400000)
+}
+
 client.on('ready', () => {
   // Input: none
   // Output: Message which affirms connectivity.
   console.log(`Logged in as ${client.user.tag}!`);
-
-  // TODO: Add a SRC fetch to check for new PBs.
-    // what time range would make sense? a check each day? 
-    // is this already implemented in other discords?
+  checkPBs()
 });
 
 client.on('message', msg => {
