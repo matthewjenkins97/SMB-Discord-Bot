@@ -237,7 +237,11 @@ async function generateNewTimes() {
 
     const time = new Date(item.run.times.primary_t * 1000).toISOString().substr(11, 8);
 
-    formattedRuns.push({'username': username, 'game': game, 'category': category, 'time': time});
+    const video = item.run.videos != null ?
+    item.run.videos.links[0].uri : 'Video not found.';
+
+    formattedRuns.push({'username': username,
+      'game': game, 'category': category, 'time': time, 'video': video});
   }
 
   return formattedRuns;
@@ -254,7 +258,7 @@ async function checkPBs() {
 
   const newTimes = await generateNewTimes();
   for (const item of newTimes) {
-    const sentence = `Within the past day in ${item.game}, ${item.username} got a new PB of ${item.time} in the ${item.category} category!`;
+    const sentence = `${item.game} - ${item.category} - ${item.username} - ${item.time} - ${item.video}`;
 
     if (DEBUG) {
       client.channels.get('614275762102468618').send(sentence);
