@@ -257,16 +257,23 @@ async function checkPBs() {
   console.log(`Checking for PBs at ${new Date()}`);
 
   const newTimes = await generateNewTimes();
-  for (const item of newTimes) {
-    const sentence = `${item.game} - ${item.category} - ${item.username} - ${item.time} - ${item.video}`;
 
-    if (DEBUG) {
-      client.channels.get('614275762102468618').send(sentence);
-      // BIS PB brag
-    } else {
-      client.channels.get('603335654415400961').send(sentence);
-      // SMB PB brag
+  let sentence = 'Here are the runs verified within the last 24 hours:';
+
+  const channel = DEBUG ? '614275762102468618' : '603335654415400961';
+  client.channels.get(channel).send(sentence);
+
+  // check if newTimes have been recorded in the past 24 hours
+  // if they have them, push them to pb-brag
+  if (newTimes.length > 0) {
+    for (const item of newTimes) {
+      sentence = `${item.game} - ${item.category} - ${item.username} - ${item.time} - ${item.video}`;
+      client.channels.get(channel).send(sentence);
     }
+  // otherwise, push no runs found.
+  } else {
+    sentence = 'No runs found.';
+    client.channels.get(channel).send(sentence);
   }
 
   setTimeout(checkPBs, 86400000);
