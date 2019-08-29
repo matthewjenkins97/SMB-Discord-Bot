@@ -5,10 +5,12 @@
   "main": "bot.js",
   "author": "Matthew Jenkins",
   "dependencies": {
-    "discord.js": "^11.5.1"
+    "discord.js": "^11.5.1",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.4"
   },
   "devDependencies": {
-    "eslint": "^6.2.1",
+    "eslint": "^6.2.2",
     "eslint-config-google": "^0.13.0",
     "request-debug": "^0.2.0"
   }

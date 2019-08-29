@@ -213,7 +213,7 @@ async function requestSMBLeaderboards() {
   return newTimes;
 }
 
-async function generateNewTimes() {
+async function postNewTimes() {
   // Input: none
   // Output: All users, categories, and times from the past day.
   const runs = await requestSMBLeaderboards();
@@ -256,7 +256,7 @@ async function checkPBs() {
   // Output: Messages to specific channel which state PBs done in the past day.
   console.log(`Checking for PBs at ${new Date()}`);
 
-  const newTimes = await generateNewTimes();
+  const newTimes = await postNewTimes();
 
   let sentence = 'Here are the runs verified within the last 24 hours:';
 
@@ -320,94 +320,85 @@ client.on('message', (msg) => {
       };
       msg.channel.send({files: [pictureAttachment], embed: embed});
     }
-  } else if (msg.content.startsWith('!getStageFromID')) {
+  } else if (msg.content.startsWith('!getStage')) {
     console.log(`Message received from ${msg.author} at ${msg.createdAt}`);
 
-    // Get stage from ID - 2 arguments needed
+    // Get stage from ID / name - 2 arguments needed
     let argList = msg.content.split(' ');
     argList = argList.slice(1, argList.length);
 
     // Checking if arguments are valid
     if (argList.length == 2 &&
-      ['SMB1', 'SMB2'].includes(argList[0].toUpperCase()) &&
-      (argList[1].match(/[ABEMabem]{1,2}\d{2}/) ||
-      argList[1].match(/[Ss]\d{4}/))) {
-      // feed arguments to function
-      const item = getSMBLevelFromID(argList[0], argList[1]);
+      ['SMB1', 'SMB2'].includes(argList[0].toUpperCase())) {
+      // checking if argument 2 is a name or an ID
+      if (argList[1].match(/[ABEMabem]{1,2}\d{2}/) ||
+      argList[1].match(/[Ss]\d{4}/)) {
+        // feed arguments to function
+        const item = getSMBLevelFromID(argList[0], argList[1]);
 
-      // make the message using formatData,
-      // then add attachment of image from the URL of the item.
-      if (item == undefined) {
-        msg.reply('No levels found in database with that ID.');
-        console.log('No levels found in database with that ID.');
-      } else {
         // make the message using formatData,
         // then add attachment of image from the URL of the item.
-        msg.reply(formatData(item));
-        console.log(item);
+        if (item == undefined) {
+          msg.reply('No levels found in database with that ID.');
+          console.log('No levels found in database with that ID.');
+        } else {
+          // make the message using formatData,
+          // then add attachment of image from the URL of the item.
+          msg.reply(formatData(item));
+          console.log(item);
 
-        const pictureAttachment = new Discord.Attachment(`./${item.picture}`);
-        const embed = {
-          image: {
-            url: `attachment://${item.picture}`,
-          },
-        };
-        msg.channel.send({files: [pictureAttachment], embed: embed});
-      }
-    }
-  } else if (msg.content.startsWith('!getStageFromName')) {
-    console.log(`Message received from ${msg.author} at ${msg.createdAt}`);
-
-    // Get stage from Name - 2+ arguments needed
-    let argList = msg.content.split(' ');
-    argList = argList.slice(1, argList.length);
-
-    // Checking if arguments are valid
-    if (argList.length >= 2 &&
-      ['SMB1', 'SMB2'].includes(argList[0].toUpperCase())) {
-      // get all array things past index 1 and merge them to form 1 word
-      let name = argList.slice(1, argList.length);
-      name = name.join(' ');
-
-      // feed arguments to function
-      const itemList = getSMBLevelFromName(argList[0], name);
-
-      // make the message using formatData,
-      // then add attachment of image from the URL of the item.
-
-      // this is done in a loop on the off-chance that more than one level is
-      // received.
-
-      if (itemList.length == 0) {
-        msg.reply('No levels found in database with that name.');
-        console.log('No levels found in database with that name.');
-      } else {
-        // if you do a dumb search (like a 1 letter search), it shouldn't print
-        // every possible search query to the server.
-        // this controls that - if the query returns more than 5 elements, it
-        // will only print 5 elements, and not print any pictures to go with it.
-        // this should help with bandwidth concerns.
-        const endPoint = itemList.length > 5 ? 5 : itemList.length;
-        const endPointFlag = endPoint == 5 ? true : false;
-        if (endPointFlag) {
-          msg.reply('Only 5 most relevant items shown. Pictures will not be embedded.');
+          const pictureAttachment = new Discord.Attachment(`./${item.picture}`);
+          const embed = {
+            image: {
+              url: `attachment://${item.picture}`,
+            },
+          };
+          msg.channel.send({files: [pictureAttachment], embed: embed});
         }
+      } else {
+        let name = argList.slice(1, argList.length);
+        name = name.join(' ');
 
-        // for each photo found in itemList, up to endPoint, print formatted
-        // stage data and embed pictures to go with it, unless endpointflag is
-        // set to true.
-        for (let i = 0; i < endPoint; i++) {
-          msg.reply(formatData(itemList[i]));
-          console.log(itemList[i]);
+        // feed arguments to function
+        const itemList = getSMBLevelFromName(argList[0], name);
 
-          if (!endPointFlag) {
-            const pictureAttachment = new Discord.Attachment(`./${itemList[i].picture}`);
-            const embed = {
-              image: {
-                url: `attachment://${itemList[i].picture}`,
-              },
-            };
-            msg.channel.send({files: [pictureAttachment], embed: embed});
+        // make the message using formatData,
+        // then add attachment of image from the URL of the item.
+
+        // this is done in a loop on the off-chance that more than one level is
+        // received.
+
+        if (itemList.length == 0) {
+          msg.reply('No levels found in database with that name.');
+          console.log('No levels found in database with that name.');
+        } else {
+          // if you do a dumb search (like a 1 letter search), it shouldn't print
+          // every possible search query to the server.
+          // this controls that - if the query returns more than 5 elements, it
+          // will only print 5 elements, and not print any pictures to go with it.
+          // this should help with bandwidth concerns.
+          const endPoint = itemList.length > 5 ? 5 : itemList.length;
+          const endPointFlag = endPoint == 5 ? true : false;
+          if (endPointFlag) {
+            msg.reply('Only 5 most relevant items shown. Pictures will not be embedded.');
+          }
+
+          // for each photo found in itemList, up to endPoint, print formatted
+          // stage data and embed pictures to go with it, unless endpointflag is
+          // set to true.
+          for (let i = 0; i < endPoint; i++) {
+            msg.reply(formatData(itemList[i]));
+            console.log(itemList[i]);
+
+            if (!endPointFlag) {
+              const pictureAttachment = new Discord.Attachment(`./${itemList[i].picture}`);
+              const embed = {
+                image: {
+                  url: `attachment://${itemList[i].picture}`,
+                },
+              };
+              msg.channel.send({files: [pictureAttachment], embed: embed});
+            }
           }
         }
       }
