@@ -149,7 +149,7 @@ function getTimes(leaderboard) {
   // yesterday's date.
 
   // get yesterday's date
-  const yesterday = new Date();
+  yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
 
   const runs = [];
@@ -178,36 +178,62 @@ async function requestSMBLeaderboards() {
   // Output: list of all runs from leaderboards with time greater than
   // yesterday.
 
-  const smb1Leaderboards = ['Beginner', 'Beginner-Ex', 'Advanced',
-    'Advanced-Ex', 'Expert', 'Master', 'All_Difficulties'];
-  const smb2Leaderboards = ['Story_Mode', 'Beginner', 'Advanced',
-    'Expert', 'Master', 'All_Difficulties'];
+  // list of leaderboards per game, as well as links to each leaderboard on SRC
+  // order: smb1, smb2, smbdx, t&r, adventure, bb, step & roll,
+  // monkeyed ball 2, scrap651
+  const links = [
+    `https://www.speedrun.com/api/v1/leaderboards/supermonkeyball/category/`,
+    `https://www.speedrun.com/api/v1/leaderboards/supermonkeyball2/category/`,
+    `https://www.speedrun.com/api/v1/leaderboards/smbdeluxe/category/`,
+    `https://www.speedrun.com/api/v1/leaderboards/touchandroll/category/`,
+    `https://www.speedrun.com/api/v1/leaderboards/smbadventure/category/`,
+    `https://www.speedrun.com/api/v1/leaderboards/bananablitz/category/`,
+    `https://www.speedrun.com/api/v1/leaderboards/stepandroll/category/`,
+
+    // ROM HACKS
+    `https://www.speedrun.com/api/v1/leaderboards/smb2mb2/category/`,
+    `https://www.speedrun.com/api/v1/leaderboards/smb651/category/`,
+  ];
+
+  // list of leaderboards per game, as well as links to each leaderboard on SRC
+  // order: smb1, smb2, smbdx, t&r, adventure, bb, step & roll,
+  // monkeyed ball 2, scrap651
+  const leaderboards = [
+    ['Beginner', 'Beginner-Ex', 'Advanced', 'Advanced-Ex',
+      'Expert', 'Master', 'All_Difficulties'],
+    ['Story_Mode', 'Beginner', 'Advanced', 'Expert', 'Master',
+      'All_Difficulties'],
+    ['Ultimate', 'Beginner', 'Advanced', 'Expert', 'Master',
+      'Story_Mode'],
+    ['All_Worlds', 'Main_Worlds_1-8', 'Extra_Worlds_9-12'],
+    ['Story_Mode_Any', 'Story_Mode_100', 'Beginner',
+      'Advanced', 'Expert', 'All_Difficulties'],
+    ['All_Bosses', 'All_Worlds'],
+    ['All_Worlds', 'Half_Marathon_Exercise',
+      'Half_Marathon_Maniac', 'Full_Marathon'],
+
+    // ROM HACKS
+    ['Story_Mode', 'Beginner', 'Advanced', 'Expert', 'Master',
+      'Ultimate', '270_Stages'],
+    ['Story_Mode_All_Levels'],
+  ];
+
   let newTimes = [];
 
-  // go through each category in the provided leaderboard
-  for (const item of smb1Leaderboards) {
-    let leaderboardTimes = [];
-    const lb = await
-    request(`https://www.speedrun.com/api/v1/leaderboards/supermonkeyball/category/${item}`);
+  // go through each category in each leaderboards
 
-    // console.log(`Leaderboard obtained from ${item}`);
-    const leaderboard = JSON.parse(lb);
-    leaderboardTimes = getTimes(leaderboard);
+  for (let i = 0; i < links.length; i++) {
+    for (const item of leaderboards[i]) {
+      let leaderboardTimes = [];
 
-    newTimes = newTimes.concat(leaderboardTimes);
-  }
+      console.log(links[i] + item);
+      const lb = await request(links[i] + item);
 
-  // go through each category in the provided leaderboard
-  for (const item of smb2Leaderboards) {
-    let leaderboardTimes = [];
-    const lb = await
-    request(`https://www.speedrun.com/api/v1/leaderboards/supermonkeyball2/category/${item}`);
+      const leaderboard = JSON.parse(lb);
+      leaderboardTimes = getTimes(leaderboard);
 
-    // console.log(`Leaderboard obtained from ${item}`);
-    const leaderboard = JSON.parse(lb);
-    leaderboardTimes = getTimes(leaderboard);
-
-    newTimes = newTimes.concat(leaderboardTimes);
+      newTimes = newTimes.concat(leaderboardTimes);
+    }
   }
 
   return newTimes;
